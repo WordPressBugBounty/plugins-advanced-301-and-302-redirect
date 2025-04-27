@@ -1,8 +1,8 @@
 === Advanced 301 and 302 Redirect ===
 Contributors: YYDevelopment
-Tags: 301 redirect, 302 redirect, redirect, redirection, redirects, advanced 301 and 302 redirect
-Requires at least: 4
-Tested up to: 6.5
+Tags: 301 redirect, 302 redirect, redirection, redirect plugin, advanced 301 and 302 redirect
+Requires at least: 5.0
+Tested up to: 6.8
 Stable tag: 1.6.8
 Requires PHP: 5.2.4
 License: GPLv2 or later
