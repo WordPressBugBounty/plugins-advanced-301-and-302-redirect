@@ -2,7 +2,7 @@
 Contributors: YYDevelopment
 Tags: 301 redirect, 302 redirect, redirection, redirect plugin, advanced 301 and 302 redirect
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 6.9
 Stable tag: 1.6.9
 Requires PHP: 5.2.4
 License: GPLv2 or later
