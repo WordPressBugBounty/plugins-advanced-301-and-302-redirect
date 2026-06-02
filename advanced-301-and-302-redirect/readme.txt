@@ -3,13 +3,13 @@ Contributors: YYDevelopment
 Tags: 301 redirect, 302 redirect, redirection, redirect plugin, advanced 301 and 302 redirect
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.6.9
+Stable tag: 1.7.0
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.yydevelopment.com/coffee-break/?plugin=advanced-301-and-302-redirect
 
-Advanced plugin will allow you to create 301 and 302 redirects on your site and organize them by folders.
+Advanced plugin will allow you to create 301 and 302 redirects on your site and organize them by folders. 
 
 == Description ==
 
@@ -203,6 +203,9 @@ A 302 redirect is a temporary redirect saying that the page was moved to differe
 
 = 1.6.9 =
 * Fixed broken access control vulnerability 
+
+= 1.7.0 =
+* Fixed SQL injection vulnerability (might cause problems with special case URL redirects)
 
 == Upgrade Notice ==
 

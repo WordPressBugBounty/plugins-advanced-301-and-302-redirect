@@ -115,7 +115,7 @@ if( !defined( 'WP_CLI' ) && isset($_SERVER['HTTP_HOST']) ) {
 
     $url_user_request_strlower = strtolower($url_user_request); // makindg english caracters not capital
 
-    $full_url_path = strtolower(yydev_redirect_get_address());
+    $full_url_path = esc_url_raw(strtolower(yydev_redirect_get_address()));
 
     // removing the first / from links in case the user forgot to add it.
     $url_without_slash = rtrim($url_user_request, '/');
@@ -142,7 +142,7 @@ if( !defined( 'WP_CLI' ) && isset($_SERVER['HTTP_HOST']) ) {
         if(!empty($url_user_request)) {
             
             // checking if there are database lines with the redirect similar to the corrent url
-            $check_if_redirect_exists = $wpdb->get_results("SELECT * FROM " . $yydev_secondary_table_name . " WHERE request_url = '{$url_user_request}' || request_url = '{$url_user_request_strlower}' OR request_url = '{$full_url_path}' OR request_url = '{$url_without_slash}' OR request_url = '{$urldecode_user_request}' OR request_url = '{$urldecode_user_request_without_start_slash}' OR request_url = '{$url_with_end_slash}' ");
+            $check_if_redirect_exists = $wpdb->get_results( $wpdb->prepare("SELECT * FROM " . $yydev_secondary_table_name . " WHERE request_url = %s OR request_url = %s OR request_url = %s OR request_url = %s OR request_url = %s OR request_url = %s OR request_url = %s", $url_user_request, $url_user_request_strlower, $full_url_path, $url_without_slash, $urldecode_user_request, $urldecode_user_request_without_start_slash, $url_with_end_slash) );
 
             // if there are url that require redirection 
             if( count($check_if_redirect_exists) > 0 ) {
@@ -225,7 +225,7 @@ if( !defined( 'WP_CLI' ) && isset($_SERVER['HTTP_HOST']) ) {
         if(!empty($url_user_request)) {
             
             // checking if there are database lines with the redirect similar to the corrent url
-            $check_if_redirect_exists = $wpdb->get_results("SELECT * FROM " . $yydev_secondary_table_name . " WHERE redirect_query = 'contain' ");
+            $check_if_redirect_exists = $wpdb->get_results( $wpdb->prepare("SELECT * FROM " . $yydev_secondary_table_name . " WHERE redirect_query = %s", 'contain') );
 
             // if there are url that require redirection 
             if( count($check_if_redirect_exists) > 0 ) {
