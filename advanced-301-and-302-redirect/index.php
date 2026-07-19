@@ -4,7 +4,7 @@
 Plugin Name: YYDevelopment - Advanced 301 and 302 Redirect
 Plugin URI:  https://www.yydevelopment.com/yydevelopment-wordpress-plugins/
 Description: Simple plugin that will allow to redirect pages as 301 and 302 redirects in wordpress
-Version:     1.7.0
+Version:     1.8.1
 Author:      YYDevelopment
 Author URI:  https://www.yydevelopment.com/
 */
@@ -60,7 +60,7 @@ function yydev_redirect_wordpress_redirect_page() {
     include('include/script.php');
     
     // Including the main page and the secondary page
-    if( isset($_GET['view']) && ($_GET['view'] === 'secondary') && isset($_GET['id'])  ) {
+    if( isset($_GET['view']) && ($_GET['view'] === 'secondary') && ( isset($_GET['id']) || ( isset($_GET['view_all']) && $_GET['view_all'] == '1' ) )  ) {
         include('include/secondary-page.php');
     } else {
         include('include/main-page.php');

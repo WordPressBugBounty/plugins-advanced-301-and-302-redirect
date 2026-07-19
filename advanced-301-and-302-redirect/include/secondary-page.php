@@ -5,7 +5,8 @@ $success_message = '';
 $post_error_message = '';
 
 // the id number for this page
-$secondary_page_id = intval($_GET['id']);
+$view_all_mode = ( isset($_GET['view_all']) && $_GET['view_all'] == '1' ) ? 1 : 0;
+$secondary_page_id = $view_all_mode ? 0 : ( isset($_GET['id']) ? intval($_GET['id']) : 0 );
 
 // ====================================================
 // Include the file that contains all the info
@@ -20,18 +21,22 @@ $plugin_page_url = esc_url( menu_page_url( 'yydev-redirection', false ) );
 // if the data was not found
 // ====================================================
 
-    if( isset($secondary_page_id) && !empty($secondary_page_id) && is_numeric($secondary_page_id) ) {
+    global $wpdb;
+
+    if( !$view_all_mode ) {
+
+        if( isset($secondary_page_id) && !empty($secondary_page_id) && is_numeric($secondary_page_id) ) {
+            $check_for_real_data_id = $wpdb->query("SELECT id FROM " . $yydev_redirect_table_name . " WHERE id = " . $secondary_page_id);
+            
+            if($check_for_real_data_id == 0) {
+                $post_error_message = "The redirect id you were looking for was not found";
+            } // if($check_for_real_data_id < 1 ) {
         
-        global $wpdb;
-        $check_for_real_data_id = $wpdb->query("SELECT id FROM " . $yydev_redirect_table_name . " WHERE id = " . $secondary_page_id);
-        
-        if($check_for_real_data_id == 0) {
+        } else { // if( isset($secondary_page_id) && !empty($secondary_page_id) && is_numeric($secondary_page_id) ) {
             $post_error_message = "The redirect id you were looking for was not found";
-        } // if($check_for_real_data_id < 1 ) {
-    
-    } else { // if( isset($secondary_page_id) && !empty($secondary_page_id) && is_numeric($secondary_page_id) ) {
-        $post_error_message = "The redirect id you were looking for was not found";
-    } // } else { // if( isset($secondary_page_id) && !empty($secondary_page_id) && is_numeric($secondary_page_id) ) {
+        } // } else { // if( isset($secondary_page_id) && !empty($secondary_page_id) && is_numeric($secondary_page_id) ) {
+
+    } // if( !$view_all_mode ) {
 
 // ====================================================
 // Update the main database if it's changed
@@ -93,7 +98,11 @@ if( isset($_GET['remove-secondary-form']) && isset($_GET['secondary_id']) && !em
         $wpdb->delete( $yydev_secondary_table_name, array('id'=>$secondary_redirect_id) );
 
         $success_message = "The redirect was removed successfully";
-        $new_page_link = $plugin_page_url . "&view=secondary&id=" . $secondary_page_id . "&message=" . urlencode($success_message);
+        if( $view_all_mode ) {
+            $new_page_link = $plugin_page_url . "&view=secondary&view_all=1&message=" . urlencode($success_message);
+        } else {
+            $new_page_link = $plugin_page_url . "&view=secondary&id=" . $secondary_page_id . "&message=" . urlencode($success_message);
+        } // if( $view_all_mode ) {
         wp_redirect($new_page_link);
 
     } else { // if($check_secondary_data_id > 0) {
@@ -287,6 +296,7 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
                         $destination_url = esc_url_raw($_POST['destination_url'][$this_secondary_data_id]);
                         $redirect_query = sanitize_text_field($_POST['redirect_query'][$this_secondary_data_id]);
                         $get_parameters = intval($_POST['get_parameters'][$this_secondary_data_id]);
+                        $folder_id = intval($_POST['folder_id'][$this_secondary_data_id]);
 
                         // Checking data id exists
                         $check_database_exists = $wpdb->query("SELECT id FROM " . $yydev_secondary_table_name . " where id = " . $main_deta_id);
@@ -305,7 +315,8 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
                             'redirects_amount'=>$redirects_amount,
                             'redirect_query'=>$redirect_query,
                             'get_parameters'=>$get_parameters,
-                            ), array('id'=>$main_deta_id), array('%s', '%s', '%s', '%s', '%f', '%d', '%s', '%d') );
+                            'secondary_id'=>$folder_id,
+                            ), array('id'=>$main_deta_id), array('%s', '%s', '%s', '%s', '%f', '%d', '%s', '%d', '%d') );
                         
                             $success_message = "The redirect settings were updated successfully";
 
@@ -327,7 +338,7 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
 
 
 <div class="wrap yydevelopment-redirecting <?php if(is_rtl()) {echo "yydevelopment-redirecting-rtl";} ?>">
-    <h2 class="isplay-inline">Edit 301/302 Redirects <a class="go-back-button" href="<?php echo $plugin_page_url; ?>">Go Back</a></h2>
+    <h2 class="isplay-inline"><?php if( $view_all_mode ) { echo 'All Redirects'; } else { echo 'Edit 301/302 Redirects'; } ?> <a class="go-back-button" href="<?php echo $plugin_page_url; ?>">Go Back</a></h2>
     
     <?php yydev_redirect_echo_message_if_exists(); ?>
     <?php yydev_redirect_echo_success_message_if_exists($success_message); ?>
@@ -335,6 +346,8 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
     
     <div class="insert-new">
         
+<?php if( !$view_all_mode ) { ?>
+
 <?php
 
     $check_secondary_deta_id = $wpdb->get_row("SELECT * FROM " . $yydev_redirect_table_name . " WHERE id = " . $secondary_page_id );
@@ -381,8 +394,8 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
                 <div class="add_new_url_block">
                     <label for="redirect_type">Redirection Type: </label>
                     <select name="redirect_type" id="redirect_type">
-                    <option value="301">301 Permanent Redirect</option>
-                    <option value="302">302 Temporary Redirect</option>
+                    <option value="301">301 (Permanent)</option>
+                    <option value="302">302 (Temporary)</option>
                     </select>
                 </div><!--add_new_url_block-->
 
@@ -392,7 +405,7 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
 
                 <div class="advertising_platform">
                     <label for="advertising_platform">Affiliate Platform: <small>(optional)</small> </label>
-                    <input type="text" id="advertising_platform" class="input-340" name="advertising_platform" value="" /> 
+                    <input type="text" id="advertising_platform" class="input-260" name="advertising_platform" value="" /> 
                     <small>Examples: CJ, Impact, ClickBank, Amazon</small>
                 </div><!--add_new_url_block-->
 
@@ -427,25 +440,28 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
     </form>
 
     
+    <?php } // if( !$view_all_mode ) { ?>
+
     <br /><br /><br />
-    <h2>Edit Redirects</h2>     
+    <h2><?php if( $view_all_mode ) { echo 'All Redirects'; } else { echo 'Edit Redirects'; } ?></h2>     
     
 
-    <div class="main-page-table">
-    <form method="POST" action="">
+    <div class="main-page-table secondery-page-table">
+    <form method="POST" action="<?php echo $view_all_mode ? $plugin_page_url . '&view=secondary&view_all=1' : ''; ?>">
 
         <table class="wp-list-table widefat fixed striped posts boxes-table redirect-table-th">
         <thead>
             <tr>
                 <th style="width:25px;">ID</th>
-                <th style="width:280px;">Request URL</th>
-                <th style="width:280px;">Destination URL</th>
-                <th style="width:155px;">Redirect Type</th>
-                <th style="width:60px;">Redirects Amount</th>
+                <th style="width:200px;">Request URL</th>
+                <th style="width:200px;">Destination URL</th>
+                <th style="width:115px;">Redirect Type</th>
+                <th style="width:50px;">Redirects Amount</th>
                 <th style="width:125px;">Affiliate Platform</th>
                 <th style="width:115px;">Redirect Query</th>
                 <th style="width:70px;">URL GET Parameters</th>
-                <th style="width:60px;">Position</th>
+                <th style="width:50px;">Position</th>
+                <th style="width:150px;">Folder</th>
                 <th style="width:60px;">Remove</th>
             </tr>
         </thead>
@@ -458,16 +474,22 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
     // Echoing all the secondary data from the database 
     // ================================================
         
-        $main_secondary_data_info = $wpdb->get_results("SELECT * FROM " . $yydev_secondary_table_name . " WHERE secondary_id = " . $secondary_page_id . " ORDER BY position ASC");
+        if( $view_all_mode ) {
+            $main_secondary_data_info = $wpdb->get_results("SELECT * FROM " . $yydev_secondary_table_name . " ORDER BY id ASC");
+        } else {
+            $main_secondary_data_info = $wpdb->get_results("SELECT * FROM " . $yydev_secondary_table_name . " WHERE secondary_id = " . $secondary_page_id . " ORDER BY position ASC");
+        } // if( $view_all_mode ) {
         
         // Echo there is no data found 
         if(empty($main_secondary_data_info)) {
     ?>
-        <tr class="no-items"><td class="colspanchange" colspan="9">No. redirects found</td></tr>
+        <tr class="no-items"><td class="colspanchange" colspan="11">No. redirects found</td></tr>
     <?php     
         } // if(empty($main_secondary_data_info)) {
         
         
+        $all_folders = $wpdb->get_results("SELECT * FROM " . $yydev_redirect_table_name . " ORDER BY name ASC");
+
         $position_number = 1;
         foreach($main_secondary_data_info as $secondary_data_info) {
 
@@ -479,20 +501,20 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
                 
                 <td><?php echo $position_number; ?></td>
 
-                <td><input type="text" id="request_url" class="input-340 direction-ltr;" name="request_url[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($secondary_data_info->request_url); ?>" /></td>
+                <td><input type="text" id="request_url" class="input-260 direction-ltr;" name="request_url[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($secondary_data_info->request_url); ?>" /></td>
 
-                <td><input type="text" id="destination_url" class="input-340 direction-ltr;" name="destination_url[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($secondary_data_info->destination_url); ?>" /></td>
+                <td><input type="text" id="destination_url" class="input-260 direction-ltr;" name="destination_url[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($secondary_data_info->destination_url); ?>" /></td>
 
                 <td>
                     <select name="redirect_type[<?php echo $secondery_data_info_id; ?>]">
-                    <option value="301" <?php if( $secondary_data_info->redirect_type == "301") {echo "selected";} ?> >301 Permanent Redirect</option>
-                        <option value="302" <?php if ($secondary_data_info->redirect_type == "302") {echo "selected";} ?> >302 Temporary Redirect</option>
+                    <option value="301" <?php if( $secondary_data_info->redirect_type == "301") {echo "selected";} ?> >301 (Permanent)</option>
+                        <option value="302" <?php if ($secondary_data_info->redirect_type == "302") {echo "selected";} ?> >302 (Temporary)</option>
                     </select>
                 </td>
 
                 <td><input type="text" id="redirects_amount" class="text_color shorter_input" name="redirects_amount[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($secondary_data_info->redirects_amount); ?>" /></td>
 
-                <td><input type="text" id="advertising_platform" name="advertising_platform[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($secondary_data_info->advertising_platform); ?>" /></td>
+                <td><input type="text" id="advertising_platform" class="input-160 direction-ltr;" name="advertising_platform[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($secondary_data_info->advertising_platform); ?>" /></td>
 
                 <td>
                     <select name="redirect_query[<?php echo $secondery_data_info_id; ?>]">
@@ -509,10 +531,28 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
                     </select>
                 </td>
 
-                <td><input type="text" id="position_<?php echo $secondery_data_info_id; ?>" class="text_color shorter_input" name="position[<?php echo $secondery_data_info_id; ?>]" value="<?php echo yydev_redirect_html_output($position_number); ?>" /></td>
+                <td><input type="text" id="position_<?php echo $secondery_data_info_id; ?>" class="text_color shorter_input" name="position[<?php echo $secondery_data_info_id; ?>]" value="<?php
+
+                     // show different position count on view all option and on folder page
+                     // so we won't change the order when editing all redirect in one page
+                    if( $view_all_mode ) {
+                        echo yydev_redirect_html_output($secondary_data_info->position);
+                    } else {
+                        echo yydev_redirect_html_output($position_number);
+                    }
+
+                ?>" /></td>
+
+                <td>
+                    <select class="select_folder" " name="folder_id[<?php echo $secondery_data_info_id; ?>]">
+                        <?php foreach($all_folders as $folder) { ?>
+                        <option value="<?php echo $folder->id; ?>" <?php if($secondary_data_info->secondary_id == $folder->id) {echo "selected";} ?>><?php echo esc_html($folder->name); ?></option>
+                        <?php } // foreach($all_folders as $folder) { ?>
+                    </select>
+                </td>
 
                 <td style="vertical-align:middle;">
-                    <a class="remove-secondary-form-image remove-form" href="<?php echo $plugin_page_url . "&view=secondary&remove-secondary-form=1&id=" . $secondary_page_id . "&secondary_id=" . intval($secondary_data_info->id); ; ?>">
+                    <a class="remove-secondary-form-image remove-form" href="<?php echo $plugin_page_url . "&view=secondary&remove-secondary-form=1" . ( $view_all_mode ? "&view_all=1" : "&id=" . $secondary_page_id ) . "&secondary_id=" . intval($secondary_data_info->id); ; ?>">
                         <img  src="<?php echo plugins_url( 'images/delete.png', dirname(__FILE__) ); ?>" alt="" />
                     </a>
                 </td>
@@ -533,14 +573,15 @@ if( isset($_POST['yydev_redirect_nonce_update_secondary_deta']) ) {
         <tfoot>
             <tr>
                 <th style="width:25px;">ID</th>
-                <th style="width:280px;">Request URL</th>
-                <th style="width:280px;">Destination URL</th>
-                <th style="width:155px;">Redirect Type</th>
-                <th style="width:60px;">Redirects Amount</th>
+                <th style="width:200px;">Request URL</th>
+                <th style="width:200px;">Destination URL</th>
+                <th style="width:115px;">Redirect Type</th>
+                <th style="width:50px;">Redirects Amount</th>
                 <th style="width:125px;">Affiliate Platform</th>
                 <th style="width:115px;">Redirect Query</th>
                 <th style="width:70px;">URL GET Parameters</th>
-                <th style="width:60px;">Position</th>
+                <th style="width:50px;">Position</th>
+                <th style="width:150px;">Folder</th>
                 <th style="width:60px;">Remove</th>
             </tr>
         </tfoot>

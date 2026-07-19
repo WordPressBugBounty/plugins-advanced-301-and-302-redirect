@@ -107,6 +107,14 @@ if( isset($_POST['yydev_redirect_nonce_remove']) ) {
 
 } // if( isset($_POST['yydev_redirect_nonce_remove']) ) {
 
+// ================================================
+// Echoing all the data from the database 
+// ================================================
+
+    global $wpdb;
+    $database_content_output = $wpdb->get_results("SELECT * FROM " . $yydev_redirect_table_name . " ORDER BY id DESC ");
+    $total_folders = count($database_content_output);
+
 ?>
 
 <div class="wrap yydevelopment-redirecting-main yydevelopment-redirecting <?php if(is_rtl()) {echo "yydevelopment-redirecting-rtl yydevelopment-redirecting-rtl-main";} ?>">
@@ -122,8 +130,9 @@ if( isset($_POST['yydev_redirect_nonce_remove']) ) {
 
     <br />    
     <div class="insert-new">
-        
-        <h5>Add Redirect</h5>
+
+        <h5>Add Redirect Folder</h5>
+        <br /><br />
         <form class="insert-form" method="POST" action="">
             <label for="form_submit_name">New Redirect Name</label>
             <input type="text" id="form_submit_name" class="form_submit_name input-long direction-ltr" name="form_submit_name" value="" />
@@ -141,8 +150,9 @@ if( isset($_POST['yydev_redirect_nonce_remove']) ) {
             ?>
         </form>
     
+    
     </div><!--insert-new-->
-            
+
     <div class="main-page-table">
     <table class="wp-list-table widefat fixed striped posts">
     <thead>
@@ -157,13 +167,6 @@ if( isset($_POST['yydev_redirect_nonce_remove']) ) {
     <tbody id="the-list">
     
 <?php
-    
-// ================================================
-// Echoing all the data from the database 
-// ================================================
-    
-    global $wpdb;
-    $database_content_output = $wpdb->get_results("SELECT * FROM " . $yydev_redirect_table_name . " ORDER BY id DESC ");
     
     // Echo if nothing was found
     if(empty($database_content_output)) {
@@ -208,7 +211,19 @@ if( isset($_POST['yydev_redirect_nonce_remove']) ) {
     </table>
     </div><!--main-page-table-->
         
-<br />
+
+    <?php if( $total_folders > 1 ) { ?>
+        <br />
+        <div class="view-all-redirects-wrap">
+            <a class="button" href="<?php echo $plugin_page_url . '&view=secondary&view_all=1'; ?>">View All Redirects Folder On One Page (Bulk Edit)</a>
+        </div><!--view-all-redirects-wrap-->
+        <br />
+    <?php } // if( $total_folders > 1 ) { ?>
+
+
+
+
+<br /><br />
 <span id="footer-thankyou-code">This plugin was create by <a target="_blank" href="https://www.yydevelopment.com">YYDevelopment</a>. If you liked the plugin please give it a <a target="_blank" href="https://wordpress.org/plugins/advanced-301-and-302-redirect/#reviews">5 stars review</a>. 
 If you want to help support this FREE plugin <a target="_blank" href="https://www.yydevelopment.com/coffee-break/?plugin=advanced-301-and-302-redirect">buy us a coffee</a>.</span>
 </div><!--wrap-->

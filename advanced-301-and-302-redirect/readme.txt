@@ -1,9 +1,9 @@
 === Advanced 301 and 302 Redirect ===
-Contributors: YYDevelopment
+Contributors: yydevelopment, yochay22
 Tags: 301 redirect, 302 redirect, redirection, redirect plugin, advanced 301 and 302 redirect
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.7.0
+Stable tag: 1.8.1
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -206,6 +206,10 @@ A 302 redirect is a temporary redirect saying that the page was moved to differe
 
 = 1.7.0 =
 * Fixed SQL injection vulnerability (might cause problems with special case URL redirects)
+
+= 1.8.1 =
+* Added folder changing support for each redirect
+* Added the ability to view all redirect on one page
 
 == Upgrade Notice ==
 
