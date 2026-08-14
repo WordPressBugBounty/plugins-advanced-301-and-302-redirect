@@ -110,7 +110,18 @@ if( !defined( 'WP_CLI' ) && isset($_SERVER['HTTP_HOST']) ) {
     // Getting the end of the url path (without the domain) so we can check
     // if to redirect the page to different page
     $domains_name = get_option('home');
-    $url_user_request = str_ireplace($domains_name, '' , yydev_redirect_get_address()); // getting the url without the domain name
+    $home_path = parse_url($domains_name, PHP_URL_PATH);
+    $home_path = $home_path ? rtrim($home_path, '/') : '';
+
+    $url_user_request = $page_path_without_get_parmaters;
+    if( $home_path !== '' && stripos($url_user_request, $home_path) === 0 ) {
+        $url_user_request = substr($url_user_request, strlen($home_path));
+    } // if( $home_path !== '' && stripos($url_user_request, $home_path) === 0 ) {
+
+    if( $url_user_request === '' ) {
+        $url_user_request = '/';
+    } // if( $url_user_request === '' ) {
+
     $url_user_request = esc_url_raw($url_user_request);
 
     $url_user_request_strlower = strtolower($url_user_request); // makindg english caracters not capital
